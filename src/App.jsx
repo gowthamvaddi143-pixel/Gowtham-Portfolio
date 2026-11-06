@@ -11,17 +11,20 @@ const navigation = [
 const skillGroups = [
   {
     icon: 'bi-window',
-    title: 'Frontend',
-    skills: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React.js', 'Bootstrap', 'Tailwind CSS'],
+    title: 'Frontend UI engineering',
+    className: 'skill-card--primary',
+    skills: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'TypeScript', 'React.js', 'Bootstrap 5', 'Tailwind CSS'],
   },
   {
     icon: 'bi-braces',
-    title: 'Backend & database',
+    title: 'Backend (secondary)',
+    className: 'skill-card--secondary',
     skills: ['Node.js', 'Express.js', 'REST APIs', 'MongoDB', 'MySQL'],
   },
   {
     icon: 'bi-tools',
     title: 'Tools',
+    className: 'skill-card--tools',
     skills: ['Git', 'GitHub', 'VS Code', 'Postman'],
   },
 ]
@@ -128,10 +131,17 @@ function HeroSection() {
           </span>
           <p className="hero-intro">Hello, I&apos;m</p>
           <h1>Vaddi<br /><span>Gowtham.</span></h1>
-          <p className="hero-role">Frontend / Full Stack React Developer</p>
+          <p className="hero-role">Frontend UI Developer <span aria-hidden="true">·</span> React Developer</p>
           <p className="hero-tagline">
-            I turn ideas into thoughtful, responsive web experiences—one detail at a time.
+            I build polished, responsive interfaces with React, thoughtful details, and a focus on the people using them.
           </p>
+          <ul className="hero-expertise" aria-label="Frontend expertise">
+            <li>HTML5</li>
+            <li>CSS3</li>
+            <li>JavaScript</li>
+            <li>TypeScript</li>
+            <li>React.js</li>
+          </ul>
           <div className="hero-actions">
             <a className="btn btn-dark btn-lg primary-button" href="#projects">
               View projects <i className="bi bi-arrow-down-right" aria-hidden="true" />
@@ -173,7 +183,7 @@ function HeroSection() {
             </div>
             <div className="code-window-footer">
               <span><i className="bi bi-check-circle-fill" aria-hidden="true" /> All systems go</span>
-              <span>React · JavaScript</span>
+              <span>React · TypeScript</span>
             </div>
           </div>
           <div className="floating-note floating-note--top">
@@ -200,7 +210,7 @@ function AboutSection() {
         <SectionHeading eyebrow="A little about me" title={<>Curious by nature.<br />Developer by choice.</>} />
         <div className="about-copy">
           <p>
-            I&apos;m a frontend and full stack React developer based in Hyderabad, India. I enjoy
+            I&apos;m a frontend UI developer and React developer based in Madhapur, Hyderabad. I enjoy
             building responsive web applications that feel clear, useful, and easy to navigate.
           </p>
           <p>
@@ -230,7 +240,7 @@ function SkillsSection() {
         <div className="row g-4 skill-grid">
           {skillGroups.map((group) => (
             <div className="col-md-6 col-lg-4" key={group.title}>
-              <article className="skill-card h-100">
+              <article className={`skill-card ${group.className} h-100`}>
                 <div className="skill-card-heading">
                   <span className="skill-icon"><i className={`bi ${group.icon}`} aria-hidden="true" /></span>
                   <h3>{group.title}</h3>
