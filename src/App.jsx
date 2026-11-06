@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import emailjs from '@emailjs/browser'
 import './App.css'
 
 const navigation = [
@@ -309,15 +310,18 @@ function ContactSection() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
   const [errors, setErrors] = useState({})
   const [submitted, setSubmitted] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   function handleChange(event) {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
     setErrors((current) => ({ ...current, [name]: '' }))
     setSubmitted(false)
+    setSubmitError('')
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const nextErrors = {}
     if (!form.name.trim()) nextErrors.name = 'Please enter your name.'
@@ -333,8 +337,37 @@ function ContactSection() {
       return
     }
 
-    setSubmitted(true)
-    setForm({ name: '', email: '', message: '' })
+    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    if (!publicKey) {
+      setSubmitError('The contact form is not configured yet. Please email me directly instead.')
+      return
+    }
+
+    setIsSending(true)
+    setSubmitError('')
+
+    try {
+      await emailjs.send(
+        'service_lfp6rij',
+        'template_z71id4i',
+        {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          from_name: form.name.trim(),
+          from_email: form.email.trim(),
+          reply_to: form.email.trim(),
+          message: form.message.trim(),
+        },
+        { publicKey },
+      )
+      setSubmitted(true)
+      setForm({ name: '', email: '', message: '' })
+    } catch (error) {
+      console.error('EmailJS contact form submission failed.', error)
+      setSubmitError('Your message could not be sent. Please try again or email me directly.')
+    } finally {
+      setIsSending(false)
+    }
   }
 
   return (
@@ -354,7 +387,13 @@ function ContactSection() {
         <form className="contact-form" onSubmit={handleSubmit} noValidate>
           {submitted && (
             <div className="alert alert-success success-alert" role="status">
-              Thanks for reaching out! Your message is ready to be sent.
+              Thanks for reaching out! Your message has been sent.
+            </div>
+          )}
+          {submitError && (
+            <div className="alert alert-danger success-alert" role="alert">
+              {submitError}{' '}
+              <a href="mailto:gowthamvaddi143@gmail.com">Email me directly</a>.
             </div>
           )}
           <div className="mb-4">
@@ -404,10 +443,11 @@ function ContactSection() {
             />
             {errors.message && <div className="invalid-feedback" id="contact-message-error">{errors.message}</div>}
           </div>
-          <button className="btn btn-dark btn-lg primary-button submit-button" type="submit">
-            Send a message <i className="bi bi-arrow-up-right" aria-hidden="true" />
+          <button className="btn btn-dark btn-lg primary-button submit-button" type="submit" disabled={isSending}>
+            {isSending ? 'Sending...' : 'Send a message'}
+            <i className={`bi ${isSending ? 'bi-arrow-repeat' : 'bi-arrow-up-right'}`} aria-hidden="true" />
           </button>
-          <p className="form-note">This demo form validates your message locally and does not send email.</p>
+          <p className="form-note">Your message will be sent by email. I&apos;ll get back to you soon.</p>
         </form>
       </div>
     </section>
