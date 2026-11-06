@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import emailjs from '@emailjs/browser'
 import './App.css'
 
@@ -12,9 +12,9 @@ const navigation = [
 const skillGroups = [
   {
     icon: 'bi-window',
-    title: 'Frontend UI engineering',
+    title: 'Frontend UI',
     className: 'skill-card--primary',
-    skills: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'TypeScript', 'React.js', 'Bootstrap 5', 'Tailwind CSS'],
+    skills: ['HTML5', 'CSS3', 'JavaScript (ES6+)', 'TypeScript', 'React.js', 'Bootstrap', 'Tailwind CSS'],
   },
   {
     icon: 'bi-braces',
@@ -33,33 +33,36 @@ const skillGroups = [
 const projects = [
   {
     number: '01',
-    icon: 'bi-check2-square',
-    title: 'To-Do Application',
-    description:
-      'A responsive task manager with create, read, update, and delete actions, plus shared app state.',
-    technologies: ['React', 'Redux', 'REST APIs'],
-    variant: 'project-card--peach',
-    link: 'https://github.com/',
-  },
-  {
-    number: '02',
-    icon: 'bi-play-btn',
-    title: 'React Video App',
-    description:
-      'A video-sharing experience with separate admin and user flows, comments, likes, and video management.',
-    technologies: ['React', 'Hooks', 'MongoDB', 'REST APIs'],
-    variant: 'project-card--blue',
-    link: 'https://github.com/',
-  },
-  {
-    number: '03',
     icon: 'bi-grid-1x2',
     title: 'UI Gallery',
     description:
       'A collection of responsive interface experiments focused on thoughtful layouts and reusable components.',
     technologies: ['React', 'JavaScript', 'CSS'],
     variant: 'project-card--lavender',
-    link: 'https://github.com/',
+    demoLink: null,
+    repository: null,
+  },
+  {
+    number: '02',
+    icon: 'bi-check2-square',
+    title: 'To Do Application',
+    description:
+      'A responsive task manager with create, read, update, and delete actions, plus shared app state.',
+    technologies: ['React', 'Redux', 'REST APIs'],
+    variant: 'project-card--peach',
+    demoLink: null,
+    repository: 'https://github.com/gowthamvaddi143-pixel/react-task-manager',
+  },
+  {
+    number: '03',
+    icon: 'bi-play-btn',
+    title: 'React Video App',
+    description:
+      'A video-sharing experience with separate admin and user flows, comments, likes, and video management.',
+    technologies: ['React', 'Hooks', 'MongoDB', 'REST APIs'],
+    variant: 'project-card--blue',
+    demoLink: null,
+    repository: 'https://github.com/gowthamvaddi143-pixel/video-project',
   },
 ]
 
@@ -75,13 +78,36 @@ function SectionHeading({ eyebrow, title, description }) {
 
 function NavigationBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
+
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return undefined
+
+    const sections = navigation
+      .map(([, section]) => document.getElementById(section))
+      .filter(Boolean)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleSections = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)
+
+        if (visibleSections[0]) setActiveSection(visibleSections[0].target.id)
+      },
+      { rootMargin: '-20% 0px -65% 0px', threshold: [0, 0.2, 0.5] },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <header className="site-header">
       <nav className="navbar navbar-expand-lg container" aria-label="Main navigation">
         <a className="navbar-brand brand-mark" href="#home" onClick={() => setIsMenuOpen(false)}>
-          <span className="brand-icon">g.</span>
-          <span>Gowtham<span className="brand-dot">.</span></span>
+          <img className="brand-icon" src="/logo.jpg" alt="" />
+          <span>GowthaM<span className="brand-dot">.</span></span>
         </a>
         <button
           className="navbar-toggler menu-toggle"
@@ -101,8 +127,9 @@ function NavigationBar() {
             {navigation.map(([label, section]) => (
               <li className="nav-item" key={section}>
                 <a
-                  className="nav-link"
+                  className={`nav-link${activeSection === section ? ' active' : ''}`}
                   href={`#${section}`}
+                  aria-current={activeSection === section ? 'location' : undefined}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {label}
@@ -142,6 +169,7 @@ function HeroSection() {
             <li>JavaScript</li>
             <li>TypeScript</li>
             <li>React.js</li>
+            <li>Bootstrap</li>
           </ul>
           <div className="hero-actions">
             <a className="btn btn-dark btn-lg primary-button" href="#projects">
@@ -184,7 +212,7 @@ function HeroSection() {
             </div>
             <div className="code-window-footer">
               <span><i className="bi bi-check-circle-fill" aria-hidden="true" /> All systems go</span>
-              <span>React · TypeScript</span>
+              <span>React · JavaScript</span>
             </div>
           </div>
           <div className="floating-note floating-note--top">
@@ -247,7 +275,11 @@ function SkillsSection() {
                   <h3>{group.title}</h3>
                 </div>
                 <div className="skill-badges">
-                  {group.skills.map((skill) => <span className="skill-badge" key={skill}>{skill}</span>)}
+                  {group.skills.map((skill) => (
+                    <span className="skill-badge" key={skill}>
+                      {skill}
+                    </span>
+                  ))}
                 </div>
               </article>
             </div>
@@ -259,6 +291,8 @@ function SkillsSection() {
 }
 
 function ProjectsSection() {
+  const projectCount = String(projects.length).padStart(2, '0')
+
   return (
     <section className="section section-projects" id="projects">
       <div className="container">
@@ -275,7 +309,7 @@ function ProjectsSection() {
             <div className="col-md-6 col-lg-4" key={project.number}>
               <article className={`project-card ${project.variant}`}>
                 <div className="project-visual">
-                  <span className="project-number">{project.number} / 03</span>
+                  <span className="project-number">{project.number} / {projectCount}</span>
                   <div className="project-illustration" aria-hidden="true">
                     <i className={`bi ${project.icon}`} />
                   </div>
@@ -288,19 +322,26 @@ function ProjectsSection() {
                     {project.technologies.map((technology) => <span key={technology}>{technology}</span>)}
                   </div>
                   <div className="project-links">
-                    <a href={project.link} target="_blank" rel="noreferrer">
-                      Live demo <i className="bi bi-arrow-up-right" aria-hidden="true" />
-                    </a>
-                    <a href={project.link} target="_blank" rel="noreferrer">
-                      GitHub repo <i className="bi bi-github" aria-hidden="true" />
-                    </a>
+                    {project.demoLink ? (
+                      <a href={project.demoLink} target="_blank" rel="noreferrer">
+                        Live demo <i className="bi bi-arrow-up-right" aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="project-link-unavailable">Demo coming soon</span>
+                    )}
+                    {project.repository ? (
+                      <a href={project.repository} target="_blank" rel="noreferrer">
+                        GitHub repo <i className="bi bi-github" aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <span className="project-link-unavailable">Repository coming soon</span>
+                    )}
                   </div>
                 </div>
               </article>
             </div>
           ))}
         </div>
-        <p className="project-note"><i className="bi bi-info-circle" aria-hidden="true" /> Project links are placeholders—more details coming soon.</p>
       </div>
     </section>
   )
